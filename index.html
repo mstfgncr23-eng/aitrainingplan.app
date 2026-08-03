@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AI Training Plan için çok adımlı agent workflow demosu" />
+  <title>AI Training Plan · Agent Pipeline</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">aitrainingplan.app</p>
+        <h1>Tek prompt değil, çalışan bir agent zinciri.</h1>
+        <p class="hero-copy">
+          Profilini normalize eder, planı üretir, kurallarla doğrular, takvime yayınlar ve tamamlanma verisine göre yeni sürüm oluşturur.
+        </p>
+      </div>
+      <div class="hero-badge">
+        <span class="pulse"></span>
+        <div>
+          <strong>5 ayrı adım</strong>
+          <small>izlenebilir event log ile</small>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel input-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Girdi</p>
+            <h2>Koç profilini oluştur</h2>
+          </div>
+          <span class="status-chip">Demo</span>
+        </div>
+
+        <form id="profile-form">
+          <label>
+            Hedef
+            <select id="goal" name="goal">
+              <option value="muscle">Kas kazanımı</option>
+              <option value="fat-loss">Yağ kaybı</option>
+              <option value="strength">Güç artışı</option>
+              <option value="general">Genel kondisyon</option>
+            </select>
+          </label>
+
+          <div class="field-grid">
+            <label>
+              Haftalık gün
+              <input id="days" name="days" type="number" min="2" max="6" value="3" />
+            </label>
+            <label>
+              Seans süresi
+              <input id="duration" name="duration" type="number" min="25" max="90" value="50" />
+            </label>
+          </div>
+
+          <div class="field-grid">
+            <label>
+              Seviye
+              <select id="level" name="level">
+                <option value="beginner">Başlangıç</option>
+                <option value="intermediate" selected>Orta</option>
+                <option value="advanced">İleri</option>
+              </select>
+            </label>
+            <label>
+              Ekipman
+              <select id="equipment" name="equipment">
+                <option value="gym">Tam spor salonu</option>
+                <option value="dumbbell">Dambıl</option>
+                <option value="bodyweight">Vücut ağırlığı</option>
+              </select>
+            </label>
+          </div>
+
+          <label class="checkbox-row">
+            <input id="knee-limit" type="checkbox" />
+            <span>Diz hassasiyeti var</span>
+          </label>
+
+          <button class="primary-button" type="submit">
+            Pipeline'ı çalıştır
+            <span>→</span>
+          </button>
+        </form>
+
+        <div class="mini-note">
+          <strong>Gerçek çok adımlı akış:</strong>
+          Her agent yalnızca kendi görevini yapar. Validator onaylamadan yayınlama adımı çalışmaz.
+        </div>
+      </section>
+
+      <section class="panel workspace-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Workflow</p>
+            <h2>Agent çalışma izi</h2>
+          </div>
+          <span id="run-status" class="status-chip muted">Hazır</span>
+        </div>
+
+        <ol id="pipeline" class="pipeline">
+          <li data-step="intake">
+            <span class="step-number">1</span>
+            <div><strong>Intake Agent</strong><small>Serbest girdiyi yapılandırır</small></div>
+            <span class="step-state">Bekliyor</span>
+          </li>
+          <li data-step="planner">
+            <span class="step-number">2</span>
+            <div><strong>Plan Agent</strong><small>Aday programı üretir</small></div>
+            <span class="step-state">Bekliyor</span>
+          </li>
+          <li data-step="validator">
+            <span class="step-number">3</span>
+            <div><strong>Validator Agent</strong><small>Süre, hacim ve güvenlik kontrolü</small></div>
+            <span class="step-state">Bekliyor</span>
+          </li>
+          <li data-step="publisher">
+            <span class="step-number">4</span>
+            <div><strong>Calendar Publisher</strong><small>Onaylanan planı takvime çevirir</small></div>
+            <span class="step-state">Bekliyor</span>
+          </li>
+          <li data-step="adapter">
+            <span class="step-number">5</span>
+            <div><strong>Adaptation Agent</strong><small>Gerçekleşen performansa göre sürüm üretir</small></div>
+            <span class="step-state">Bekliyor</span>
+          </li>
+        </ol>
+
+        <div id="empty-state" class="empty-state">
+          <div class="empty-icon">⌁</div>
+          <h3>Pipeline henüz çalışmadı</h3>
+          <p>Soldaki profil ile ilk planı üret.</p>
+        </div>
+
+        <div id="result-area" class="result-area hidden">
+          <div class="result-header">
+            <div>
+              <p class="eyebrow">Onaylanan çıktı</p>
+              <h3 id="plan-title">Plan v1</h3>
+            </div>
+            <button id="download-calendar" class="secondary-button" type="button">Takvime aktar (.ics)</button>
+          </div>
+
+          <div id="validation-summary" class="validation-summary"></div>
+          <div id="schedule" class="schedule"></div>
+
+          <div class="adapt-card">
+            <div>
+              <p class="eyebrow">Canlı adaptasyon</p>
+              <h3>İlk haftanın sonucu</h3>
+              <p>Bu veriler planı baştan yazmaz; kontrollü bir sonraki sürüm üretir.</p>
+            </div>
+            <div class="adapt-controls">
+              <label>
+                Tamamlanma oranı
+                <input id="completion" type="range" min="20" max="100" value="85" />
+                <output id="completion-output">%85</output>
+              </label>
+              <label>
+                Ortalama RPE
+                <input id="rpe" type="range" min="5" max="10" step="0.5" value="7.5" />
+                <output id="rpe-output">7.5</output>
+              </label>
+              <button id="adapt-plan" class="primary-button compact" type="button">Yeni sürüm üret</button>
+            </div>
+          </div>
+
+          <details class="event-log-wrap">
+            <summary>Event log ve agent kararları</summary>
+            <pre id="event-log"></pre>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <section class="panel autopsy-panel">
+      <div>
+        <p class="eyebrow">Failure autopsy</p>
+        <h2>Takvim retry'sı planı neden yanlış küçülttü?</h2>
+        <p>
+          Eski senaryoda API timeout sonrası aynı seans iki kez yazılıyor, kopya etkinlikler “kaçırıldı” sayılıyor ve completion oranı yanlış düşüyordu.
+          Bu demoda her seans için idempotency anahtarı kullanılıyor; aynı publish işlemi tekrar çalışsa bile kopya üretilmiyor.
+        </p>
+      </div>
+      <button id="simulate-retry" class="secondary-button" type="button">Retry senaryosunu test et</button>
+      <div id="retry-result" class="retry-result">Henüz test edilmedi.</div>
+    </section>
+
+    <footer>
+      <span>AI Training Plan Agent Workflow</span>
+      <span>Generate → Validate → Publish → Adapt</span>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
